@@ -28,10 +28,30 @@ type Config struct {
 	Dns_records_map map[string]RecordType `yaml:"dns_records_map"`
 }
 
+// функция возвращает имена исходных файлов в директории с программой.
+func FindAllTXTFiles() ([]string, error) {
+	var filesList []string
+
+	files, err := os.ReadDir(".")
+	if err != nil {
+		log.Fatalf("error: %v", err)
+		return nil, err
+	}
+
+	for _, file := range files {
+		if !file.IsDir() && strings.HasSuffix(file.Name(), ".txt") {
+            filesList = append(filesList, file.Name())
+        }
+	}
+	return filesList, nil
+}
+
+// функция дублирует имя выходного файда на такое что было у исходного и добавляет расширение yaml
 func changeExtension(filename, newExt string) string {
 	return strings.TrimSuffix(filename, filepath.Ext(filename)) + newExt
 }
 
+// функция которая подготавливает карту с dns зоной
 func processFile(filename string) (Config, error) {
 	config := Config{
 		Dns_records_map: make(map[string]RecordType),
@@ -55,7 +75,7 @@ func processFile(filename string) (Config, error) {
 
 		if lineNumber == 2 {
 			zoneName = words[len(words)-1]
-			fmt.Println("Zone name:", zoneName)
+			fmt.Printf("Zone processing begins: %s\n", zoneName)
 
 			if _, exists := config.Dns_records_map[zoneName]; !exists {
 				config.Dns_records_map[zoneName] = RecordType{}
@@ -93,21 +113,30 @@ func processFile(filename string) (Config, error) {
 }
 
 func main() {
-	inputFilename := "zone.bak"
-	outputFilename := changeExtension(inputFilename, ".yaml")
+	txtFiles, err := FindAllTXTFiles()
+    if err != nil {
+        log.Fatalf("error: %v", err)
+    }
 
-	config, err := processFile(inputFilename)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
+    for _, txtFile := range txtFiles {
+		fmt.Printf("Files with zones found: %s\n", txtFile)
 
-	if err := writeConfigToFile(config, outputFilename); err != nil {
-		log.Fatalf("error: %v", err)
-	}
+		outputFilename := changeExtension(txtFile, ".yaml")
 
-	fmt.Printf("YAML data written to %s\n", outputFilename)
+		config, err := processFile(txtFile)
+		if err != nil {
+			log.Fatalf("error: %v", err)
+		}
+
+		if err := writeConfigToFile(config, outputFilename); err != nil {
+			log.Fatalf("error: %v", err)
+		}
+
+		fmt.Printf("YAML data written to file %s\n", outputFilename)
+    }
 }
 
+// функция непосредственно занимается конвертация карты в yaml формат
 func writeConfigToFile(config Config, filename string) error {
 	data, err := yaml.Marshal(&config)
 	if err != nil {
