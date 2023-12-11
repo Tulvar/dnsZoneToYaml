@@ -40,8 +40,8 @@ func FindAllTXTFiles() ([]string, error) {
 
 	for _, file := range files {
 		if !file.IsDir() && strings.HasSuffix(file.Name(), ".txt") {
-            filesList = append(filesList, file.Name())
-        }
+			filesList = append(filesList, file.Name())
+		}
 	}
 	return filesList, nil
 }
@@ -114,11 +114,11 @@ func processFile(filename string) (Config, error) {
 
 func main() {
 	txtFiles, err := FindAllTXTFiles()
-    if err != nil {
-        log.Fatalf("error: %v", err)
-    }
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
 
-    for _, txtFile := range txtFiles {
+	for _, txtFile := range txtFiles {
 		fmt.Printf("Files with zones found: %s\n", txtFile)
 
 		outputFilename := changeExtension(txtFile, ".yaml")
@@ -133,7 +133,7 @@ func main() {
 		}
 
 		fmt.Printf("YAML data written to file %s\n", outputFilename)
-    }
+	}
 }
 
 // функция непосредственно занимается конвертация карты в yaml формат
