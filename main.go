@@ -85,7 +85,7 @@ func processFile(filename string) (Config, error) {
 		if len(words) >= 2 {
 			recordType := words[len(words)-2]
 			recordValue := words[len(words)-1]
-			recordName := words[0]
+			recordName := fmt.Sprintf("%s.%s", words[0], zoneName)
 
 			recordTypeData := config.Dns_records_map[zoneName]
 
